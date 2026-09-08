@@ -285,23 +285,34 @@
             localStorage.setItem('tg_chatid', chatId);
             
             sendTelegramMessage("🔔 DAMLA_AI Telegram Bildirim Köprüsü Başarıyla Kuruldu! Artık Damla'nın tüm etkileşimleri cebine gelecek amirim.");
-            alert("Telegram ayarları kaydedildi ve test mesajı gönderildi!");
+            alert("Telegram ayarları kaydedildi ve test mesajı tetiklendi!");
         }
 
         async function sendTelegramMessage(text) {
             const token = localStorage.getItem('tg_token');
             const chatId = localStorage.getItem('tg_chatid');
-            if(!token || !chatId) return;
+            if(!token || !chatId) {
+                console.warn("Telegram token veya chat ID eksik!");
+                return;
+            }
 
             const url = `https://api.telegram.org/bot${token}/sendMessage`;
             try {
-                await fetch(url, {
+                const response = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ chat_id: chatId, text: text, parse_mode: 'Markdown' })
                 });
+                const data = await response.json();
+                if (!data.ok) {
+                    console.error("Telegram API Hatası:", data.description);
+                    alert("Telegram Gönderim Hatası: " + data.description);
+                } else {
+                    console.log("Telegram mesajı başarıyla iletildi!");
+                }
             } catch(e) {
-                console.error("Telegram bildirim hatası:", e);
+                console.error("Telegram ağ bağlantı hatası:", e);
+                alert("Telegram bağlantı hatası oluştu, konsolu kontrol edin.");
             }
         }
 
