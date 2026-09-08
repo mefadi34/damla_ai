@@ -212,8 +212,8 @@
             <div class="admin-body">
                 <div class="admin-card">
                     <div class="admin-card-title">Telegram Bot Ayarları (Anlık Bildirim)</div>
-                    <div style="font-size: 0.780rem; color: var(--muted); margin-bottom: 4px;">Bot Token (Hazır yüklü):</div>
-                    <input type="text" id="tg-token" class="admin-input" value="8978133936:AAGbytSm8IHqYqA3535VvvjAhidd3hvnunc">
+                    <div style="font-size: 0.780rem; color: var(--muted); margin-bottom: 4px;">Bot Token (BotFather'dan aldığın):</div>
+                    <input type="password" id="tg-token" class="admin-input" placeholder="Token yapıştır (Örn: 8978133936:...)">
                     <div style="font-size: 0.780rem; color: var(--muted); margin-top: 8px; margin-bottom: 4px;">Senin Telegram Chat ID'n:</div>
                     <input type="text" id="tg-chatid" class="admin-input" placeholder="Örn: 123456789">
                     <button class="auth-btn" style="margin-top: 10px; padding: 10px; font-size: 0.8rem;" onclick="saveTelegramSettings()">Telegram'ı Kaydet & Test Et 🔔</button>
@@ -268,7 +268,7 @@
         }
 
         function loadTelegramSettingsToUI() {
-            const savedToken = localStorage.getItem('tg_token') || "8978133936:AAGbytSm8IHqYqA3535VvvjAhidd3hvnunc";
+            const savedToken = localStorage.getItem('tg_token') || "";
             const savedChatId = localStorage.getItem('tg_chatid') || "";
             document.getElementById('tg-token').value = savedToken;
             document.getElementById('tg-chatid').value = savedChatId;
@@ -277,15 +277,15 @@
         function saveTelegramSettings() {
             const token = document.getElementById('tg-token').value.trim();
             const chatId = document.getElementById('tg-chatid').value.trim();
+            if(!token || !chatId) {
+                alert("Lütfen hem Bot Token'ı hem de Chat ID'yi eksiksiz gir amirim!");
+                return;
+            }
             localStorage.setItem('tg_token', token);
             localStorage.setItem('tg_chatid', chatId);
             
-            if(chatId) {
-                sendTelegramMessage("🔔 DAMLA_AI Telegram Bildirim Köprüsü Başarıyla Kuruldu! Artık Damla'nın tüm etkileşimleri cebine gelecek amirim.");
-                alert("Telegram ayarları kaydedildi ve test mesajı gönderildi!");
-            } else {
-                alert("Lütfen Telegram Chat ID'ni gir amirim!");
-            }
+            sendTelegramMessage("🔔 DAMLA_AI Telegram Bildirim Köprüsü Başarıyla Kuruldu! Artık Damla'nın tüm etkileşimleri cebine gelecek amirim.");
+            alert("Telegram ayarları kaydedildi ve test mesajı gönderildi!");
         }
 
         async function sendTelegramMessage(text) {
@@ -462,6 +462,8 @@ Cemile'den çok daha üstün olduğunu ve tamamen onun ruh haline göre evrildi�
 
             const dna = localStorage.getItem('damla_learned_dna') || "Henüz derin veri öğrenilmedi.";
             document.getElementById('admin-dna-profile').innerHTML = dna;
+
+            loadTelegramSettingsToUI();
 
             const logs = JSON.parse(localStorage.getItem('admin_logs') || '[]');
             const stream = document.getElementById('admin-log-stream');
