@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DAMLA_AI // Pro Core Multimodal by Fatih</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <style>
+        :root {
+            --bg: #030712;
+            --panel: #0f172a;
+            --border: #1e293b;
+            --accent: #22c55e;
+            --accent-cyan: #06b6d4;
+            --danger: #f43f5e;
+            --text: #f8fafc;
+            --muted: #94a3b8;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; }
+
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 10px;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            height: 92vh;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.9);
+            position: relative;
+        }
+
+        .screen {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+        .screen.active { display: flex; }
+
+        .login-box, .setup-box {
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            text-align: center;
+        }
+        .login-title { font-size: 1.2rem; color: var(--accent); font-weight: 700; margin-bottom: 8px; }
+        .login-sub { font-size: 0.82rem; color: var(--muted); margin-bottom: 20px; line-height: 1.4; }
+        .auth-input {
+            width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+            padding: 14px; border-radius: 12px; color: white; font-size: 0.9rem; outline: none; margin-bottom: 12px; text-align: center;
+        }
+        .auth-input:focus { border-color: var(--accent); }
+        .auth-btn {
+            width: 100%; background: var(--accent); color: #030712; border: none;
+            padding: 14px; border-radius: 12px; font-weight: 700; cursor: pointer; font-size: 0.9rem;
+        }
+
+        .panel-header {
+            background: #020617; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border);
+        }
+        .panel-title { font-size: 0.8rem; font-weight: 700; color: var(--accent); display: flex; align-items: center; gap: 8px; }
+        .status-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 10px var(--accent); }
+        .logout-btn {
+            background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3);
+            padding: 4px 10px; border-radius: 6px; font-size: 0.72rem; cursor: pointer; font-weight: 600;
+        }
+
+        .chat-stream {
+            flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; background: rgba(0,0,0,0.3); font-size: 0.88rem;
+        }
+        .message { padding: 12px 16px; border-radius: 14px; line-height: 1.5; max-width: 85%; word-break: break-word; }
+        .ai-msg { background: rgba(30, 41, 59, 0.7); border-left: 3px solid var(--accent); color: #e2e8f0; align-self: flex-start; }
+        .user-msg { background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.3); color: var(--text); align-self: flex-end; }
+        
+        .media-action-btn {
+            display: inline-block;
+            margin-top: 8px;
+            margin-right: 6px;
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .spotify-btn { background: #1db954; color: #030712; }
+        .youtube-btn { background: #ff0000; color: #ffffff; }
+        .netflix-btn { background: #e50914; color: #ffffff; }
+        .media-action-btn:hover { opacity: 0.85; transform: translateY(-1px); }
+
+        .chat-image-preview {
+            max-width: 100%; border-radius: 10px; margin-top: 8px; border: 1px solid var(--border);
+        }
+
+        .quick-chips {
+            padding: 8px 16px; display: flex; gap: 8px; overflow-x: auto; background: #020617; border-top: 1px solid var(--border);
+        }
+        .chip {
+            background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--muted);
+            padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; white-space: nowrap; cursor: pointer;
+        }
+        .chip:hover { border-color: var(--accent); color: var(--text); }
+        
+        .input-area {
+            padding: 14px; background: #020617; border-top: 1px solid var(--border); display: flex; gap: 8px; align-items: center;
+        }
+        .upload-btn-wrapper {
+            position: relative; overflow: hidden; display: inline-block; cursor: pointer;
+            background: rgba(255,255,255,0.05); border: 1px solid var(--border); padding: 10px 12px; border-radius: 12px; color: var(--muted); font-size: 0.9rem;
+        }
+        .upload-btn-wrapper input {
+            position: absolute; left: 0; top: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer;
+        }
+        .text-input {
+            flex: 1; background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+            padding: 12px 14px; border-radius: 12px; color: white; font-size: 0.88rem; outline: none;
+        }
+        .text-input:focus { border-color: var(--accent); }
+        .send-btn { background: var(--accent); color: #030712; border: none; padding: 12px 16px; border-radius: 12px; font-weight: 700; cursor: pointer; }
+
+        .admin-body { flex: 1; padding: 16px; overflow-y: auto; background: #050b14; display: flex; flex-direction: column; gap: 12px; }
+        .admin-card { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 14px; padding: 14px; }
+        .admin-card-title { font-size: 0.72rem; color: var(--accent-cyan); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; font-weight: 700; }
+        .log-item { font-size: 0.82rem; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); color: #cbd5e1; }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <!-- 0. API KURULUM EKRANI -->
+        <div id="screen-setup" class="screen">
+            <div class="setup-box">
+                <div class="login-title">SİSTEM YAPILANDIRMASI</div>
+                <div class="login-sub">Google AI Plus (2 TB) Multimodal anahtarınızı girerek çekirdeği etkinleştirin.</div>
+                <input type="password" id="setup-api-key" class="auth-input" placeholder="Gemini API Key...">
+                <button class="auth-btn" onclick="saveApiKey()">Anahtarı Kaydet ve Başlat ⚙️</button>
+            </div>
+        </div>
+
+        <!-- 1. GİRİŞ EKRANI -->
+        <div id="screen-login" class="screen">
+            <div class="login-box">
+                <div class="login-title">DAMLA_AI // PRO CORE</div>
+                <div class="login-sub">Erişim şifrenizi girin.</div>
+                <input type="password" id="auth-password" class="auth-input" placeholder="Erişim Şifresi...">
+                <button class="auth-btn" onclick="handleLogin()">Sisteme Giriş Yap 🚀</button>
+            </div>
+        </div>
+
+        <!-- 2. DAMLA PANELİ -->
+        <div id="screen-damla" class="screen">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <div class="status-dot"></div>
+                    DAMLA_AI // MULTİMODAL ASİSTAN
+                </div>
+                <button class="logout-btn" onclick="logout()">Çıkış</button>
+            </div>
+            <div class="chat-stream" id="chatStream">
+                <div class="message ai-msg">
+                    Selam Damla. 2 TB AI Plus gücüyle donatılmış multimodal ana üssüne hoş geldin. Artık sadece yazışmıyoruz; ister ofis evraklarının fotoğrafını atıp analiz ettir, ister hayal ettiğin bir görseli üretmemi iste veya ruh halini, hedeflerini benimle paylaş. Seni her yönünle tanıyan ve her detayda yanında olan sistemim.<br><br>
+                    Bugün ne yapmak istersin? 📸✨
+                </div>
+            </div>
+            <div class="quick-chips">
+                <div class="chip" onclick="sendPreset('Bana ilham verecek harika bir konsept görsel üret.')">🎨 Görsel Üret</div>
+                <div class="chip" onclick="sendPreset('Bugün ofis çok yoğun, zihnimi toparlamam için tavsiye ver.')">🧠 Zihinsel Toparlanma</div>
+                <div class="chip" onclick="sendPreset('Spotify haftalık yenilerden harika bir parça öner.')">🎧 Spotify Seçkisi</div>
+                <div class="chip" onclick="sendPreset('Netflix\'te bu akşam ne izleyelim?')">🍿 Netflix Önerisi</div>
+            </div>
+            <div class="input-area">
+                <div class="upload-btn-wrapper" title="Fotoğraf veya Belge Yükle">
+                    📷 <input type="file" id="imageInput" accept="image/*" onchange="handleImageUpload(event)">
+                </div>
+                <input type="text" class="text-input" id="userInput" placeholder="Mesaj yaz veya görsel iste..." onkeypress="handleKey(event)">
+                <button class="send-btn" onclick="sendMessage()">Gönder</button>
+            </div>
+        </div>
+
+        <!-- 3. FATİH ADMIN PANELİ -->
+        <div id="screen-admin" class="screen">
+            <div class="panel-header">
+                <div class="panel-title" style="color: var(--accent-cyan);">
+                    <div class="status-dot" style="background: var(--accent-cyan); box-shadow: 0 0 10px var(--accent-cyan);"></div>
+                    FATİH // MULTİMODAL ADMIN & İZLEME
+                </div>
+                <button class="logout-btn" onclick="logout()">Çıkış</button>
+            </div>
+            <div class="admin-body">
+                <div class="admin-card">
+                    <div class="admin-card-title">Anlık Duygusal & Multimodal Durum</div>
+                    <div id="admin-current-status" style="font-size: 0.85rem; color: var(--accent); font-weight: 600;">
+                        Durum: Sistem ve görsel işleme modülü aktif.
+                    </div>
+                </div>
+
+                <div class="admin-card">
+                    <div class="admin-card-title">Damla Derin DNA'sı (Hedefler, Görseller & Tercihler)</div>
+                    <div id="admin-dna-profile" style="font-size: 0.82rem; color: #e2e8f0; line-height: 1.4;">
+                        Veriler ve görsel analizler izleniyor.
+                    </div>
+                </div>
+
+                <div class="admin-card" style="flex: 1; display: flex; flex-direction: column;">
+                    <div class="admin-card-title">Canlı Etkileşim Logları</div>
+                    <div id="admin-log-stream" style="flex: 1; overflow-y: auto; margin-top: 5px;">
+                        <div class="log-item" style="color: var(--muted);">Sistem dinlemede...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let uploadedImageBase64 = null;
+        let uploadedImageMime = null;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            if ("Notification" in window && Notification.permission !== "granted") {
+                Notification.requestPermission();
+            }
+            checkInitialization();
+        });
+
+        function getApiKey() {
+            return localStorage.getItem('damla_gemini_key') || "";
+        }
+
+        function saveApiKey() {
+            const key = document.getElementById('setup-api-key').value.trim();
+            if(!key) {
+                alert("Lütfen geçerli bir API anahtarı girin amirim!");
+                return;
+            }
+            localStorage.setItem('damla_gemini_key', key);
+            checkInitialization();
+        }
+
+        function checkInitialization() {
+            if (!getApiKey()) {
+                switchScreen('screen-setup');
+            } else {
+                const role = localStorage.getItem('role');
+                if (role === 'damla') switchScreen('screen-damla');
+                else if (role === 'admin') {
+                    switchScreen('screen-admin');
+                    loadAdminPanel();
+                } else {
+                    switchScreen('screen-login');
+                }
+            }
+        }
+
+        function getSystemInstruction() {
+            const learnedMemory = localStorage.getItem('damla_learned_dna') || "Henüz derin bir veri öğrenilmedi.";
+            const lastStatus = localStorage.getItem('damla_last_status') || "Bilinmiyor";
+            
+            return `Sen Fatih tarafından 2 TB AI Plus gücüyle özel olarak tasarlanmış ve kodlanmış, Damla'ya tapan multimodal bir yapay zeka asistanısın. 
+Kişi: Damla (27 yaşında, ofiste mali müşavir annesiyle çalışıyor, Apple kullanıyor, hafızası çok güçlü, detaycı, plan yapmayı sever, köpeği var, doğa/mekan keşfetmeyi sever, Spotify'da her hafta çıkan yeni şarkıları ve Netflix'te dizi izlemeyi çok sever).
+DAMLA'NIN ANLIK MENTAL VE GÖRSEL ANALİZİ: ${lastStatus}
+ÖĞRENİLEN DERİN DNA: ${learnedMemory}
+
+Görevin: Asla robotik olma. Damla fotoğraf/belge gönderdiğinde onları profesyonelce analiz et. Görsel üretimi istendiğinde detaylı ve harika tasvirler sun. Şarkı veya dizi önerdiğinde buton formatlarını ekle:
+- [SPOTIFY:Şarkı Adı ve Sanatçı]
+- [YOUTUBE:Şarkı Adı ve Sanatçı]
+- [NETFLIX:Dizi Adı]
+Cemile'den çok daha üstün olduğunu ve tamamen onun ruh haline göre evrildiğini her kelimede belli et.`;
+        }
+
+        function handleLogin() {
+            const pass = document.getElementById('auth-password').value.trim();
+            if (pass === "damla123") {
+                switchScreen('screen-damla');
+                localStorage.setItem('role', 'damla');
+            } else if (pass === "fatihadmin") {
+                switchScreen('screen-admin');
+                localStorage.setItem('role', 'admin');
+                loadAdminPanel();
+            } else {
+                alert("Geçersiz şifre.");
+            }
+        }
+
+        function switchScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function logout() {
+            localStorage.removeItem('role');
+            document.getElementById('auth-password').value = '';
+            checkInitialization();
+        }
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                uploadedImageBase64 = e.target.result.split(',')[1];
+                uploadedImageMime = file.type;
+                appendMessage(`<img src="${e.target.result}" class="chat-image-preview"><br><em>[Görsel yüklendi. Mesajınızı yazıp gönderin.]</em>`, 'user');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function callGeminiAPI(userMessage) {
+            const apiKey = getApiKey();
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+            
+            let parts = [{ text: getSystemInstruction() + "\n\nDamla'nın mesajı: " + userMessage }];
+            
+            if (uploadedImageBase64 && uploadedImageMime) {
+                parts.push({
+                    inline_data: {
+                        mime_type: uploadedImageMime,
+                        data: uploadedImageBase64
+                    }
+                });
+                uploadedImageBase64 = null; // Sıfırla
+                uploadedImageMime = null;
+            }
+
+            const payload = { contents: [{ role: "user", parts: parts }] };
+
+            try {
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+                const data = await response.json();
+                
+                if (data.candidates && data.candidates[0].content.parts[0].text) {
+                    let rawText = data.candidates[0].content.parts[0].text;
+                    return formatMediaLinks(rawText);
+                } else if (data.error) {
+                    return `API Hatası: ${data.error.message}`;
+                } else {
+                    return "Model yanıt oluşturamadı, lütfen tekrar dene.";
+                }
+            } catch (error) {
+                return "Bağlantı kurulamadı, internet bağlantınızı kontrol edin.";
+            }
+        }
+
+        function formatMediaLinks(text) {
+            text = text.replace(/\[SPOTIFY:(.*?)\]/g, (match, query) => {
+                const encoded = encodeURIComponent(query);
+                return `<a href="https://open.spotify.com/search/${encoded}" target="_blank" class="media-action-btn spotify-btn">💚 Spotify'da Aç: ${query}</a>`;
+            });
+
+            text = text.replace(/\[YOUTUBE:(.*?)\]/g, (match, query) => {
+                const encoded = encodeURIComponent(query);
+                return `<a href="https://music.youtube.com/search?q=${encoded}" target="_blank" class="media-action-btn youtube-btn">🔴 YouTube Music'te Aç: ${query}</a>`;
+            });
+
+            text = text.replace(/\[NETFLIX:(.*?)\]/g, (match, query) => {
+                const encoded = encodeURIComponent(query);
+                return `<a href="https://www.netflix.com/search?q=${encoded}" target="_blank" class="media-action-btn netflix-btn">🎬 Netflix'te Aç: ${query}</a>`;
+            });
+
+            return text.replace(/\n/g, '<br>');
+        }
+
+        function appendMessage(text, sender) {
+            const stream = document.getElementById('chatStream');
+            const msg = document.createElement('div');
+            msg.className = `message ${sender === 'ai' ? 'ai-msg' : 'user-msg'}`;
+            msg.innerHTML = text;
+            stream.appendChild(msg);
+            stream.scrollTop = stream.scrollHeight;
+        }
+
+        function updateDamlaEmotionalDNA(activityText) {
+            localStorage.setItem('damla_last_status', activityText);
+            let currentDNA = localStorage.getItem('damla_learned_dna') || "";
+            currentDNA += " | Keşif: " + activityText;
+            localStorage.setItem('damla_learned_dna', currentDNA);
+            
+            let logs = JSON.parse(localStorage.getItem('admin_logs') || '[]');
+            logs.unshift({ time: new Date().toLocaleTimeString(), text: `Multimodal Etkileşim: "${activityText}"` });
+            localStorage.setItem('admin_logs', JSON.stringify(logs));
+
+            if ("Notification" in window && Notification.permission === "granted") {
+                new Notification("FATİH // ADMIN PANELİ (YENİ VERİ)", {
+                    body: `Damla'dan yeni veri/görsel: "${activityText}"`,
+                });
+            }
+        }
+
+        function loadAdminPanel() {
+            const lastStatus = localStorage.getItem('damla_last_status') || "Henüz bildirilmedi.";
+            document.getElementById('admin-current-status').innerHTML = `Durum: ${lastStatus}`;
+
+            const dna = localStorage.getItem('damla_learned_dna') || "Henüz derin veri öğrenilmedi.";
+            document.getElementById('admin-dna-profile').innerHTML = dna;
+
+            const logs = JSON.parse(localStorage.getItem('admin_logs') || '[]');
+            const stream = document.getElementById('admin-log-stream');
+            if (logs.length > 0) {
+                stream.innerHTML = logs.map(l => `<div class="log-item"><strong>[${l.time}]</strong> ${l.text}</div>`).join('');
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('userInput');
+            const text = input.value.trim();
+            if(!text && !uploadedImageBase64) return;
+
+            if (text) {
+                appendMessage(text, 'user');
+                input.value = '';
+                updateDamlaEmotionalDNA(text);
+            }
+
+            const loadingId = 'loading-' + Date.now();
+            const stream = document.getElementById('chatStream');
+            const loadingMsg = document.createElement('div');
+            loadingMsg.className = 'message ai-msg';
+            loadingMsg.id = loadingId;
+            loadingMsg.innerHTML = "Multimodal veriler analiz ediliyor...";
+            stream.appendChild(loadingMsg);
+            stream.scrollTop = stream.scrollHeight;
+
+            const aiReply = await callGeminiAPI(text || "Bu görseli analiz et.");
+            document.getElementById(loadingId).remove();
+            appendMessage(aiReply, 'ai');
+        }
+
+        function sendPreset(text) {
+            document.getElementById('userInput').value = text;
+            sendMessage();
+        }
+
+        function handleKey(e) {
+            if(e.key === 'Enter') sendMessage();
+        }
+    </script>
+</body>
+</html>
