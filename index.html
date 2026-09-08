@@ -211,7 +211,7 @@
                     <div class="status-dot" style="background: var(--accent-cyan); box-shadow: 0 0 10px var(--accent-cyan);"></div>
                     FATİH // TELEGRAM & ADMIN PANELİ
                 </div>
-                <button class="logout-btn" onclick="logout()">Çıkış</button>
+                <button class="logout-btn" onclick="logoutAdmin()">Çıkış</button>
             </div>
             <div class="admin-body">
                 <div class="admin-card">
@@ -257,14 +257,6 @@
             loadTelegramSettingsToUI();
         });
 
-        // Sayfa kapatıldığında / çıkıldığında Telegram'a haber ver
-        window.addEventListener('beforeunload', () => {
-            const role = localStorage.getItem('role');
-            if (role === 'damla') {
-                sendTelegramBeacon("🚪 DAMLA_AI: Damla uygulamadan çıkış yaptı / sayfayı kapattı.");
-            }
-        });
-
         function getApiKey() {
             return localStorage.getItem('damla_gemini_key') || "";
         }
@@ -296,7 +288,7 @@
             localStorage.setItem('tg_token', token);
             localStorage.setItem('tg_chatid', chatId);
             
-            sendTelegramMessage("DAMLA_AI Telegram Bildirim Koprusu Basariyla Kuruldu! Artik Damla'nın giris ve cikislari aninda cebine gelecek amirim.");
+            sendTelegramMessage("DAMLA_AI Telegram Bildirim Köprüsü Başarıyla Kuruldu! Artık Damla'nın giriş, çıkış ve etkileşimleri anında cebine gelecek amirim.");
             alert("Telegram ayarları kaydedildi ve test mesajı gönderildi!");
         }
 
@@ -314,26 +306,10 @@
                 });
                 const data = await response.json();
                 if (!data.ok) {
-                    console.error("Telegram Gönderim Hatasi:", data.description);
+                    console.error("Telegram Gönderim Hatası:", data.description);
                 }
             } catch(e) {
-                console.error("Telegram baglanti hatasi olustu.");
-            }
-        }
-
-        // Sayfa kapanırken istek garantilemek için sendBeacon (veya fetch keepalive)
-        function sendTelegramBeacon(text) {
-            const token = localStorage.getItem('tg_token');
-            const chatId = localStorage.getItem('tg_chatid');
-            if(!token || !chatId) return;
-
-            const url = `https://api.telegram.org/bot${token}/sendMessage`;
-            const payload = JSON.stringify({ chat_id: chatId, text: text });
-            
-            if (navigator.sendBeacon) {
-                navigator.sendBeacon(url, new Blob([payload], { type: 'application/json' }));
-            } else {
-                fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: payload, keepalive: true });
+                console.error("Telegram bağlantı hatası oluştu.");
             }
         }
 
@@ -374,7 +350,7 @@ Tamamen onun ruh haline ayak uydur ve her kelimede yanında olduğunu hissettir.
                 switchScreen('screen-damla');
                 localStorage.setItem('role', 'damla');
                 
-                // Giriş bildirimi
+                // Damla giriş bildirimi
                 sendTelegramMessage("🚨 DAMLA_AI: Damla şu an uygulamaya giriş yaptı!");
                 
             } else if (pass === "fatihadmin") {
@@ -391,10 +367,15 @@ Tamamen onun ruh haline ayak uydur ve her kelimede yanında olduğunu hissettir.
             document.getElementById(screenId).classList.add('active');
         }
 
-        function logout() {
-            // Çıkış bildirimi
-            sendTelegramMessage("🚪 DAMLA_AI: Damla çıkış butonuna basarak oturumu kapattı.");
-            
+        // Damla çıkış yaptığında anında Telegram'a bildirimi fırlatıp çıkışı gerçekleştirir
+        async function logout() {
+            await sendTelegramMessage("🚪 DAMLA_AI: Damla çıkış butonuna basarak oturumu kapattı.");
+            localStorage.removeItem('role');
+            document.getElementById('auth-password').value = '';
+            checkInitialization();
+        }
+
+        function logoutAdmin() {
             localStorage.removeItem('role');
             document.getElementById('auth-password').value = '';
             checkInitialization();
@@ -519,7 +500,6 @@ Tamamen onun ruh haline ayak uydur ve her kelimede yanında olduğunu hissettir.
             if (text) {
                 appendMessage(text, 'user');
                 input.value = '';
-                updateDamla'sEmotionalDNA = null; // safe
                 updateDamlaEmotionalDNA(text);
             } else if (uploadedImageBase64) {
                 updateDamlaEmotionalDNA("[Fotoğraf/Belge Yüklendi]");
