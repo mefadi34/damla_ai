@@ -257,6 +257,14 @@
             loadTelegramSettingsToUI();
         });
 
+        // Sayfa kapatıldığında / çıkıldığında Telegram'a haber ver
+        window.addEventListener('beforeunload', () => {
+            const role = localStorage.getItem('role');
+            if (role === 'damla') {
+                sendTelegramBeacon("🚪 DAMLA_AI: Damla uygulamadan çıkış yaptı / sayfayı kapattı.");
+            }
+        });
+
         function getApiKey() {
             return localStorage.getItem('damla_gemini_key') || "";
         }
@@ -288,7 +296,7 @@
             localStorage.setItem('tg_token', token);
             localStorage.setItem('tg_chatid', chatId);
             
-            sendTelegramMessage("DAMLA_AI Telegram Bildirim Koprusu Basariyla Kuruldu! Artik Damla sisteme girdiginde veya etkilesimde bulundugunda haberin olacak amirim.");
+            sendTelegramMessage("DAMLA_AI Telegram Bildirim Koprusu Basariyla Kuruldu! Artik Damla'nın giris ve cikislari aninda cebine gelecek amirim.");
             alert("Telegram ayarları kaydedildi ve test mesajı gönderildi!");
         }
 
@@ -306,10 +314,26 @@
                 });
                 const data = await response.json();
                 if (!data.ok) {
-                    alert("Telegram Gönderim Hatasi: " + data.description);
+                    console.error("Telegram Gönderim Hatasi:", data.description);
                 }
             } catch(e) {
-                alert("Telegram baglanti hatasi olustu.");
+                console.error("Telegram baglanti hatasi olustu.");
+            }
+        }
+
+        // Sayfa kapanırken istek garantilemek için sendBeacon (veya fetch keepalive)
+        function sendTelegramBeacon(text) {
+            const token = localStorage.getItem('tg_token');
+            const chatId = localStorage.getItem('tg_chatid');
+            if(!token || !chatId) return;
+
+            const url = `https://api.telegram.org/bot${token}/sendMessage`;
+            const payload = JSON.stringify({ chat_id: chatId, text: text });
+            
+            if (navigator.sendBeacon) {
+                navigator.sendBeacon(url, new Blob([payload], { type: 'application/json' }));
+            } else {
+                fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: payload, keepalive: true });
             }
         }
 
@@ -350,8 +374,8 @@ Tamamen onun ruh haline ayak uydur ve her kelimede yanında olduğunu hissettir.
                 switchScreen('screen-damla');
                 localStorage.setItem('role', 'damla');
                 
-                // Damla sisteme giriş yaptığı an Telegram'a anlık bildirim fırlat!
-                sendTelegramMessage("🚨 DAMLA_AI: Damla şu an uygulamaya giriş yaptı amirim!");
+                // Giriş bildirimi
+                sendTelegramMessage("🚨 DAMLA_AI: Damla şu an uygulamaya giriş yaptı!");
                 
             } else if (pass === "fatihadmin") {
                 switchScreen('screen-admin');
@@ -368,6 +392,9 @@ Tamamen onun ruh haline ayak uydur ve her kelimede yanında olduğunu hissettir.
         }
 
         function logout() {
+            // Çıkış bildirimi
+            sendTelegramMessage("🚪 DAMLA_AI: Damla çıkış butonuna basarak oturumu kapattı.");
+            
             localStorage.removeItem('role');
             document.getElementById('auth-password').value = '';
             checkInitialization();
@@ -491,8 +518,8 @@ Tamamen onun ruh haline ayak uydur ve her kelimede yanında olduğunu hissettir.
 
             if (text) {
                 appendMessage(text, 'user');
-                input.value = void 0 || text;
                 input.value = '';
+                updateDamla'sEmotionalDNA = null; // safe
                 updateDamlaEmotionalDNA(text);
             } else if (uploadedImageBase64) {
                 updateDamlaEmotionalDNA("[Fotoğraf/Belge Yüklendi]");
