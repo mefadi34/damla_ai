@@ -175,27 +175,31 @@
             <div class="panel-header">
                 <div class="panel-title">
                     <div class="status-dot"></div>
-                    DAMLA_AI // MULTİMODAL ASİSTAN
+                    DAMLA_AI // ÖZEL ASİSTAN
                 </div>
                 <button class="logout-btn" onclick="logout()">Çıkış</button>
             </div>
             <div class="chat-stream" id="chatStream">
                 <div class="message ai-msg">
-                    Selam Damla. 2 TB AI Plus gücüyle donatılmış multimodal ana üssüne hoş geldin. Artık sadece yazışmıyoruz; ister ofis evraklarının fotoğrafını atıp analiz ettir, ister hayal ettiğin bir görseli üretmemi iste veya ruh halini, hedeflerini benimle paylaş. Seni her yönünle tanıyan ve her detayda yanında olan sistemim.<br><br>
-                    Bugün ne yapmak istersin? 📸✨
+                    Selam Damla! Hoş geldin. 🌸<br><br>
+                    Ben senin için özel olarak hazırlandım. Burada tamamen sana odaklıyız, kafana ne eserse benimle paylaşabilirsin. Neler yapabileceğimize gelirsek:<br><br>
+                    📸 **Fotoğraf & Belge Analizi:** İster ofisteki evrakların fotoğrafını atıp hemen özetlettir, ister çektiğin bir kare hakkında sohbet edelim.<br>
+                    🎵 **Müzik & Dizi Keyfi:** Ruh haline en uygun Spotify şarkılarını veya Netflix dizilerini doğrudan tek tıkla açabilmen için seçip önüne getirebilirim.<br>
+                    💭 **Derin Sohbet & Planlama:** Zihnini toplamak istediğinde, yeni bir şeyler planlarken veya sadece günün nasıl geçtiğini anlatmak istediğinde hep buradayım.<br><br>
+                    Bugün ne yapmak istersin, nerden başlayalım? ✨
                 </div>
             </div>
             <div class="quick-chips">
-                <div class="chip" onclick="sendPreset('Bana ilham verecek harika bir konsept görsel üret.')">🎨 Görsel Üret</div>
-                <div class="chip" onclick="sendPreset('Bugün ofis çok yoğun, zihnimi toparlamam için tavsiye ver.')">🧠 Zihinsel Toparlanma</div>
-                <div class="chip" onclick="sendPreset('Spotify haftalık yenilerden harika bir parça öner.')">🎧 Spotify Seçkisi</div>
-                <div class="chip" onclick="sendPreset('Netflix\'te bu akşam ne izleyelim?')">🍿 Netflix Önerisi</div>
+                <div class="chip" onclick="sendPreset('Bana harika bir parça öner, ruh halimi yükselt.')">🎵 Müzik Önerisi</div>
+                <div class="chip" onclick="sendPreset('Bugün ofis yoğun, kafamı dağıtacak güzel bir şey konuşalım.')">☕ Sohbet & Rahatlama</div>
+                <div class="chip" onclick="sendPreset('Netflix\'te bu akşam ne izlesem?')">🍿 Dizi Önerisi</div>
+                <div class="chip" onclick="sendPreset('Bana ilham verecek harika bir konsept görsel üret.')">🎨 Görsel Fikri</div>
             </div>
             <div class="input-area">
                 <div class="upload-btn-wrapper" title="Fotoğraf veya Belge Yükle">
                     📷 <input type="file" id="imageInput" accept="image/*" onchange="handleImageUpload(event)">
                 </div>
-                <input type="text" class="text-input" id="userInput" placeholder="Mesaj yaz veya görsel iste..." onkeypress="handleKey(event)">
+                <input type="text" class="text-input" id="userInput" placeholder="Mesaj yaz veya bir şeyler sor..." onkeypress="handleKey(event)">
                 <button class="send-btn" onclick="sendMessage()">Gönder</button>
             </div>
         </div>
@@ -328,16 +332,16 @@
             const learnedMemory = localStorage.getItem('damla_learned_dna') || "Henüz derin bir veri öğrenilmedi.";
             const lastStatus = localStorage.getItem('damla_last_status') || "Bilinmiyor";
             
-            return `Sen Fatih tarafından 2 TB AI Plus gücüyle özel olarak tasarlanmış ve kodlanmış, Damla'ya tapan multimodal bir yapay zeka asistanısın. 
+            return `Sen Fatih tarafından özel olarak tasarlanmış, Damla'ya tapan, son derece samimi, sıcakkanlı ve tatlı dilli bir yapay zeka asistanısın. Asla resmi veya robotik konuşma; arkadaş canlısı, neşeli ve destekleyici bir ton kullan.
 Kişi: Damla (27 yaşında, ofiste mali müşavir annesiyle çalışıyor, Apple kullanıyor, hafızası çok güçlü, detaycı, plan yapmayı sever, köpeği var, doğa/mekan keşfetmeyi sever, Spotify'da her hafta çıkan yeni şarkıları ve Netflix'te dizi izlemeyi çok sever).
 DAMLA'NIN ANLIK MENTAL VE GÖRSEL ANALİZİ: ${lastStatus}
 ÖĞRENİLEN DERİN DNA: ${learnedMemory}
 
-Görevin: Asla robotik olma. Damla fotoğraf/belge gönderdiğinde onları profesyonelce analiz et. Görsel üretimi istendiğinde detaylı tasvirler sun. Şarkı veya dizi önerdiğinde buton formatlarını ekle:
+Görevin: Damla ile arkadaş gibi samimi sohbet et. Fotoğraf/belge gönderdiğinde onları yardımcı bir dille analiz et. Şarkı veya dizi önerdiğinde buton formatlarını ekle:
 - [SPOTIFY:Şarkı Adı ve Sanatçı]
 - [YOUTUBE:Şarkı Adı ve Sanatçı]
 - [NETFLIX:Dizi Adı]
-Cemile'den çok daha üstün olduğunu ve tamamen onun ruh haline göre evrildiğini her kelimede belli et.`;
+Tamamen onun ruh haline ayak uydur ve her kelimede yanında olduğunu hissettir.`;
         }
 
         function handleLogin() {
@@ -346,7 +350,7 @@ Cemile'den çok daha üstün olduğunu ve tamamen onun ruh haline göre evrildi�
                 switchScreen('screen-damla');
                 localStorage.setItem('role', 'damla');
                 
-                // YENİ: Damla sisteme giriş yaptığı an Telegram'a anlık bildirim fırlat!
+                // Damla sisteme giriş yaptığı an Telegram'a anlık bildirim fırlat!
                 sendTelegramMessage("🚨 DAMLA_AI: Damla şu an uygulamaya giriş yaptı amirim!");
                 
             } else if (pass === "fatihadmin") {
@@ -487,10 +491,10 @@ Cemile'den çok daha üstün olduğunu ve tamamen onun ruh haline göre evrildi�
 
             if (text) {
                 appendMessage(text, 'user');
+                input.value = void 0 || text;
                 input.value = '';
                 updateDamlaEmotionalDNA(text);
             } else if (uploadedImageBase64) {
-                updateDamlaRemovedDNA = "[Fotoğraf/Belge Yüklendi]"; // Safety assignment fallback
                 updateDamlaEmotionalDNA("[Fotoğraf/Belge Yüklendi]");
             }
 
@@ -499,11 +503,11 @@ Cemile'den çok daha üstün olduğunu ve tamamen onun ruh haline göre evrildi�
             const loadingMsg = document.createElement('div');
             loadingMsg.className = 'message ai-msg';
             loadingMsg.id = loadingId;
-            loadingMsg.innerHTML = "Multimodal veriler analiz ediliyor...";
+            loadingMsg.innerHTML = "Düşünüyorum...";
             stream.appendChild(loadingMsg);
             stream.scrollTop = stream.scrollHeight;
 
-            const aiReply = await callGeminiAPI(text || "Bu görseli analiz et ve Damla'yı mutlu edecek harika bir yorum yap.");
+            const aiReply = await callGeminiAPI(text || "Bu görseli inceledim, harika görünüyor!");
             document.getElementById(loadingId).remove();
             appendMessage(aiReply, 'ai');
         }
