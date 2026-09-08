@@ -284,35 +284,28 @@
             localStorage.setItem('tg_token', token);
             localStorage.setItem('tg_chatid', chatId);
             
-            sendTelegramMessage("🔔 DAMLA_AI Telegram Bildirim Köprüsü Başarıyla Kuruldu! Artık Damla'nın tüm etkileşimleri cebine gelecek amirim.");
-            alert("Telegram ayarları kaydedildi ve test mesajı tetiklendi!");
+            sendTelegramMessage("DAMLA_AI Telegram Bildirim Koprusu Basariyla Kuruldu! Artik Damla'nin tum etkilesimleri cebine gelecek amirim.");
+            alert("Telegram ayarları kaydedildi ve test mesajı gönderildi!");
         }
 
         async function sendTelegramMessage(text) {
             const token = localStorage.getItem('tg_token');
             const chatId = localStorage.getItem('tg_chatid');
-            if(!token || !chatId) {
-                console.warn("Telegram token veya chat ID eksik!");
-                return;
-            }
+            if(!token || !chatId) return;
 
             const url = `https://api.telegram.org/bot${token}/sendMessage`;
             try {
                 const response = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ chat_id: chatId, text: text, parse_mode: 'Markdown' })
+                    body: JSON.stringify({ chat_id: chatId, text: text }) // parse_mode kaldırıldı, tamamen saf metin!
                 });
                 const data = await response.json();
                 if (!data.ok) {
-                    console.error("Telegram API Hatası:", data.description);
-                    alert("Telegram Gönderim Hatası: " + data.description);
-                } else {
-                    console.log("Telegram mesajı başarıyla iletildi!");
+                    alert("Telegram Gönderim Hatasi: " + data.description);
                 }
             } catch(e) {
-                console.error("Telegram ağ bağlantı hatası:", e);
-                alert("Telegram bağlantı hatası oluştu, konsolu kontrol edin.");
+                alert("Telegram baglanti hatasi olustu.");
             }
         }
 
@@ -464,7 +457,7 @@ Cemile'den çok daha üstün olduğunu ve tamamen onun ruh haline göre evrildi�
             localStorage.setItem('admin_logs', JSON.stringify(logs));
 
             // Telegram'a anlık çıt bildirim at!
-            sendTelegramMessage(`🚨 *DAMLA_AI // Yeni Etkileşim*\n\nDamla'nın mesajı/verisi:\n_"${activityText}"_`);
+            sendTelegramMessage(`DAMLA_AI Yeni Etkilesim: "${activityText}"`);
         }
 
         function loadAdminPanel() {
